@@ -2,11 +2,11 @@
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
-    if (sender.action=="Go!") {
+    if (request.action=="Go!") {
 
-        console.log("Action: %s", sender.action, request);
+        //console.log("Action: %s", request.action, request);
         
-        
+
     }
 
 })
