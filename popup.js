@@ -1,32 +1,20 @@
 "use strict";
 
-console.log("Hello, world from popup!")
+//alert("Hello, world from popup!")
 
-function setBadgeText(enabled) {
-    const text = enabled ? "ON" : "OFF"
-    void chrome.action.setBadgeText({text: text})
+
+function clickButtonA() {
+    var query = { active: true, currentWindow: true };
+    function callback(tabs) {
+      //document.querySelector("#debug").value = JSON.stringify(tabs[0]);
+      chrome.tabs.sendMessage( tabs[0].id, {"action":"Go!"} );
+    }
+    chrome.tabs.query(query, callback);
 }
 
-// Handle the ON/OFF switch
-const checkbox = document.getElementById("enabled")
-chrome.storage.sync.get("enabled", (data) => {
-    checkbox.checked = !!data.enabled
-    void setBadgeText(data.enabled)
-})
-checkbox.addEventListener("change", (event) => {
-    if (event.target instanceof HTMLInputElement) {
-        void chrome.storage.sync.set({"enabled": event.target.checked})
-        void setBadgeText(event.target.checked)
-    }
-})
 
-// Handle the input field
-const input = document.getElementById("item")
-chrome.storage.sync.get("item", (data) => {
-    input.value = data.item || ""
-});
-input.addEventListener("change", (event) => {
-    if (event.target instanceof HTMLInputElement) {
-        void chrome.storage.sync.set({"item": event.target.value})
-    }
-})
+document.querySelector("#btnA").addEventListener("click", clickButtonA);
+
+
+
+
