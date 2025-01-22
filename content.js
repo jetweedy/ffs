@@ -1,6 +1,22 @@
 "use strict"
 
 
+function showCoverDiv(message) {
+    coverDiv.style.display = "block";
+    coverMessage.innerHTML = message;
+}
+function hideCoverDiv() {
+    coverDiv.style.display = "none";
+}
+
+var coverDiv = document.createElement("div");
+coverDiv.style = "opacity:.9; position:fixed; top:0px; left:0px; height:100%; width:100%; z-index:1000; background-color:white; display:none;";
+var coverMessage = document.createElement("div");
+coverMessage.innerHTML = "Please wait...";
+coverMessage.style = "position:fixed; top:50%; left:50%; font-weight:bold; font-size:2em;";
+coverDiv.append(coverMessage);
+document.body.append(coverDiv);
+
 
 
 function splitFirstWord(str) {
@@ -16,15 +32,14 @@ function splitFirstWord(str) {
 }
 
 
+
 function displayMy(friends) {
-  var div = document.createElement("div");
-  div.style = "background-color:white; padding:5%; position:fixed; width:600px; height:400px; left:15%; top:15%; border:2px solid black; border-collapse:collapse; overflow-y:scroll;";
-  document.body.append(div);
+
+    console.log("test");
+
   var table = document.createElement("table");
   var tbody = document.createElement("tbody");
   table.append(tbody);
-
-
   for (var i in friends) {
     var tr = document.createElement("tr");
     tbody.append(tr);
@@ -37,17 +52,29 @@ function displayMy(friends) {
     td.style = "border:1px solid black;";
     tr.append(td);
   }
+
+  var resultsContainer = document.createElement("div");
+  resultsContainer.style = "background-color:white; position:fixed; width:500px; left:15%; top:15%; border:2px solid black; border-collapse:collapse; height:350px;";
+  document.body.append(resultsContainer);
+
   var a = document.createElement("button");
   a.innerHTML = "[X]";
   a.style.float = "right";
   a.addEventListener("click", function() {
     this.element.parentNode.removeChild(this.element);
-  }.bind({"element":div}));
+  }.bind({"element":resultsContainer}));
   var p = document.createElement("p");
   p.style = "text-align:right;";
   p.append(a);
-  div.append(p);
-  div.append(table);
+  resultsContainer.append(p);
+
+  var tableContainer = document.createElement("div");
+  tableContainer.style = "margin:5%; left:15%; top:15%; border-collapse:collapse; height:300px; overflow-y:scroll;";
+  document.body.append(tableContainer);
+  tableContainer.append(table);
+
+  resultsContainer.append(tableContainer);
+
 }
 
 
@@ -84,6 +111,44 @@ function lookForFriends() {
 
 
 
+let scrollInterval;
+// Function to scroll to the bottom
+function scrollToBottom() {
+  window.scrollTo(0, document.body.scrollHeight);
+}
+// Function to start the auto-scrolling process
+function startAutoScroll() {
+  showCoverDiv("Scrolling...");
+  scrollInterval = setInterval(() => {
+    scrollToBottom();
+  }, 3000); // Adjust the interval (in milliseconds) as needed (currently set to 3 seconds)
+}
+// Function to stop the auto-scrolling
+function stopAutoScroll() {
+  clearInterval(scrollInterval); // Stop the scrolling
+  console.log('Scrolling stopped.');
+  //lookForFriends();
+}
+// Listen for the Escape key press
+document.addEventListener('keydown', function(event) {
+  if (event.key === 'Escape') {
+    stopAutoScroll(); // Stop the scrolling when Escape is pressed
+    hideCoverDiv();
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -93,13 +158,11 @@ function lookForFriends() {
 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-
-    if (request.action=="Go!") {
-
-        //console.log("Action: %s", request.action, request);
+    if (request.action=="Look") {
         lookForFriends();
-
     }
-
+    if (request.action=="Scroll") {
+        startAutoScroll();
+    }
 })
 

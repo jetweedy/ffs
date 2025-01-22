@@ -1,5 +1,7 @@
 
-
+#content {
+    width:225px;
+}
 #debug {
     width:400px;
     height:400px;

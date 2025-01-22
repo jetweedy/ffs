@@ -3,17 +3,26 @@
 //alert("Hello, world from popup!")
 
 
-function clickButtonA() {
+function clickButtonScoll() {
     var query = { active: true, currentWindow: true };
     function callback(tabs) {
-      //document.querySelector("#debug").value = JSON.stringify(tabs[0]);
-      chrome.tabs.sendMessage( tabs[0].id, {"action":"Go!"} );
+      chrome.tabs.sendMessage( tabs[0].id, {"action":"Scroll"} );
+    }
+    chrome.tabs.query(query, callback);
+}
+
+function clickButtonLook() {
+    var query = { active: true, currentWindow: true };
+    function callback(tabs) {
+      chrome.tabs.sendMessage( tabs[0].id, {"action":"Look"} );
     }
     chrome.tabs.query(query, callback);
 }
 
 
-document.querySelector("#btnA").addEventListener("click", clickButtonA);
+
+document.querySelector("#btnScroll").addEventListener("click", clickButtonScoll);
+document.querySelector("#btnLook").addEventListener("click", clickButtonLook);
 
 
 
