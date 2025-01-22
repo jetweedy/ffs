@@ -110,12 +110,34 @@ function lookForFriends() {
 
 
 let scrollInterval;
+
 // Function to scroll to the bottom
 function scrollToBottom() {
   window.scrollTo(0, document.body.scrollHeight);
 }
+
+function matchesFriendsPattern(text) {
+    // Define the pattern: ^\d+ friends$ matches one or more digits followed by 'friends'
+    const pattern = /^\d+ friends$/;
+    // Test if the string matches the pattern
+    return pattern.test(text);
+}
+
+function getNumberOfFriends() {
+  var as = document.querySelectorAll("a");
+  for (var a of as) {
+    if (matchesFriendsPattern(a.innerHTML)) {
+      var numFriends = parseInt(a.innerHTML.replace(" friends").trim());
+      return numFriends;
+    }
+  }
+}
+
 // Function to start the auto-scrolling process
 function startAutoScroll() {
+  var numFriends = getNumberOfFriends();
+  console.log("numFriends:", numFriends);
+  
   showCoverDiv("Scrolling...");
   scrollInterval = setInterval(() => {
     scrollToBottom();
