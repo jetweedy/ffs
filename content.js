@@ -31,11 +31,9 @@ function splitFirstWord(str) {
     }
 }
 
-
-
 function displayMy(friends) {
 
-    console.log("test");
+  console.log("test");
 
   var table = document.createElement("table");
   var tbody = document.createElement("tbody");
@@ -158,11 +156,20 @@ document.addEventListener('keydown', function(event) {
 
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+    if (request.action === 'console.log') {
+        console.log(request.message);
+    }
+
     if (request.action=="Look") {
         lookForFriends();
     }
     if (request.action=="Scroll") {
         startAutoScroll();
     }
+
+    //// https://stackoverflow.com/questions/14245334/sendmessage-from-extension-background-or-popup-to-content-script-doesnt-work
+    //// This keeps some port from closing prematurely:
+    return true
 })
 
