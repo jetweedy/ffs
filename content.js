@@ -1,6 +1,12 @@
 "use strict"
 
 
+
+
+//// -------------------------------------------------------------
+//// COVER/WAITING OVERLAY:
+//// -------------------------------------------------------------
+
 function showCoverDiv(message) {
     coverDiv.style.display = "block";
     coverMessage.innerHTML = message;
@@ -18,6 +24,12 @@ coverDiv.append(coverMessage);
 document.body.append(coverDiv);
 
 
+
+
+
+//// -------------------------------------------------------------
+//// EXAMINE FRIENDS LIST AND PREPARE FOR PROCESSING INDIVUALS:
+//// -------------------------------------------------------------
 
 function splitFirstWord(str) {
     // Use a regular expression to match the first word and the rest of the string
@@ -99,11 +111,9 @@ function lookForFriends() {
   for (var f in friends) {
     fs.push (f);
   }
-
   displayFriends();
   //console.log(friends);
   console.log(fs);
-
 }
 
 
@@ -121,6 +131,11 @@ function lookForFriends() {
 
 
 
+
+
+//// -------------------------------------------------------------
+//// SCROLL DOWN FRIENDS LIST UNTIL FULLY LOADED:
+//// -------------------------------------------------------------
 
 let scrollInterval;
 
@@ -146,22 +161,53 @@ function getNumberOfFriends() {
   }
 }
 
+function countLoadedFriends() {
+  var loadedFriends = {};
+  var items = document.querySelectorAll("div");
+  var regex = /\d+ mutual friends/;
+  for (var i=0;i<items.length;i++) {
+    var t = items[i].innerText;
+    var f = t.split("\n")[0].trim();
+    if (t.length<200 && regex.test(t) && f!="" ) {
+      loadedFriends[f] = f;
+    }
+  }
+  var friendCount = Object.keys(loadedFriends).length;
+  console.log("friendCount:", friendCount);
+  return friendCount;
+}
+
+
+var lastCount = 0;
 // Function to start the auto-scrolling process
 function startAutoScroll() {
-  var numFriends = getNumberOfFriends();
-  console.log("numFriends:", numFriends);
-  
   showCoverDiv("Scrolling...");
   scrollInterval = setInterval(() => {
+    var loadedFriends = countLoadedFriends();
+    console.log(loadedFriends, "|", lastCount);
+    if (loadedFriends == lastCount) {
+      stopAutoScroll();
+    }
+    lastCount = loadedFriends;
+    //console.log(loadedFriends, "<", numFriends, "?");
+    //if ( loadedFriends >= numFriends ) {
+    //  stopAutoScroll();
+    //}
     scrollToBottom();
-  }, 3000); // Adjust the interval (in milliseconds) as needed (currently set to 3 seconds)
+  }, 2000); // Adjust the interval (in milliseconds) as needed (currently set to 3 seconds)
 }
 // Function to stop the auto-scrolling
 function stopAutoScroll() {
   clearInterval(scrollInterval); // Stop the scrolling
+  hideCoverDiv();
   console.log('Scrolling stopped.');
   //lookForFriends();
 }
+
+var numFriends;
+numFriends = getNumberOfFriends();
+console.log("numFriends:", numFriends);
+
 // Listen for the Escape key press
 document.addEventListener('keydown', function(event) {
   if (event.key === 'Escape') {
@@ -175,8 +221,21 @@ document.addEventListener('keydown', function(event) {
 
 
 
+//// -------------------------------------------------------------
+//// GO TO FRIENDS PAGE:
+//// -------------------------------------------------------------
+
+function goToFriends() {
+  window.location.replace("https://facebook.com/me/friends");
+}
 
 
+
+
+
+//// -------------------------------------------------------------
+//// PROCESSING FRIENDS:
+//// -------------------------------------------------------------
 
 
 var friendIndex = 0;
@@ -193,17 +252,6 @@ function visitNext() {
     friendIndex++;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 function initializeFriends(callback) {
@@ -265,20 +313,10 @@ function extractEmails(text) {
     return emails ? emails : [];
 }
 
-
-
-
-
-
-
 //// Reset friends list:
 //chrome.storage.local.set({ friends: {} }, function() {});
 
-
-
-
-
-
+//// Load saved friends data and add current friend page info (if on the right kind of page):
 var friendsList;
 initializeFriends(function(friends) {
   friendsList = friends;
@@ -307,31 +345,23 @@ initializeFriends(function(friends) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+//// -------------------------------------------------------------
+//// LISTEN FOR MESSAGES FROM POPUP OR BACKGROUND:
+//// -------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
-    if (request.action === 'visitNext') {
+    if (request.action == 'visitNext') {
       visitNext();
+    }
+
+    if (request.action == "CountLoadedFriends") {
+      var lf = countLoadedFriends();
+      console.log("Loaded Friends:", lf);
+    }
+
+    if (request.action == "GoToFriends") {
+      goToFriends();
     }
 
     //if (request.action === 'console.log') {
@@ -349,4 +379,13 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     //// This keeps some port from closing prematurely:
     return true
 })
+
+
+
+
+
+
+
+
+
 
