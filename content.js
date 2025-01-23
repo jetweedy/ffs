@@ -293,7 +293,7 @@ initializeFriends(function(friends) {
         var phones = extractPhoneNumbers(t);
         //console.log(phones);
         var name = document.querySelector("h1").innerText;
-        addFriend({"name":name, "phones":phones, "emails":emails});
+        addFriend({"name":name, "phones":phones, "emails":emails, "contactText":t});
         break;
       }
     }
