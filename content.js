@@ -50,8 +50,6 @@ function displayFriends() {
   table.append(tbody);
   for (var i in friends) {
 
-    console.log(friends[i].element);
-
     var tr = document.createElement("tr");
     tbody.append(tr);
     var td = document.createElement("td");
