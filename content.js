@@ -254,7 +254,7 @@ function isFacebookContactDetailsURL(url) {
 }
 
 function extractPhoneNumbers(text) {
-    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/g;
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]\d{4}/g;
     const phoneNumbers = text.match(phoneRegex);
     return phoneNumbers ? phoneNumbers : [];
 }

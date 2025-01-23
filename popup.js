@@ -28,7 +28,7 @@ function logToContentConsole(message) {
 }
 
 function processFriends() {
-    chrome.runtime.sendMessage({"action":"startProcessing"})
+    chrome.runtime.sendMessage({"action":"visitNext"})
     
       .then((response) => {
             logToContentConsole(response)
