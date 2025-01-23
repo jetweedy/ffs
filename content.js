@@ -171,7 +171,6 @@ function countLoadedFriends() {
     }
   }
   var friendCount = Object.keys(loadedFriends).length;
-  console.log("friendCount:", friendCount);
   return friendCount;
 }
 
