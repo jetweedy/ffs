@@ -177,11 +177,13 @@ document.addEventListener('keydown', function(event) {
 
 
 
+
+
 var friendIndex = 0;
 function visitNext() {
   if (friendIndex < fs.length) {
     var url = friends[fs[friendIndex]].url+"/about_contact_and_basic_info";
-    console.log("url:", url);
+    //console.log("url:", url);
     window.open(url);
     //console.log("friendIndex:", friendIndex);
     //console.log("fs:", fs);
@@ -191,6 +193,130 @@ function visitNext() {
     friendIndex++;
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+function initializeFriends(callback) {
+    chrome.storage.local.get(['friends'], function(result) {
+        if (chrome.runtime.lastError) {
+            //console.error("Error accessing storage:", chrome.runtime.lastError);
+            return;
+        }
+
+        if (!result.friends) {
+            // If 'friends' does not exist, initialize it
+            chrome.storage.local.set({ friends: {} }, function() {
+                //console.log("Initialized 'friends' as an empty object.");
+                if (callback) callback({});
+            });
+        } else {
+            //console.log("Friends data exists:", result.friends);
+            if (callback) callback(result.friends);
+        }
+    });
+}
+
+function addFriend(friend) {
+
+    console.log(friend);
+    return;
+
+    if (!friendsList) {
+        //console.error("Friends list is not initialized yet.");
+        return;
+    }
+    friendsList[friend.name] = friend;
+    //console.log("Added friend:", friend);
+    // Step 4: Save updated friends list to chrome storage
+    chrome.storage.local.set({ friends: friendsList }, function() {
+        if (chrome.runtime.lastError) {
+            //console.error("Error saving to storage:", chrome.runtime.lastError);
+        } else {
+            //console.log("Updated friends list saved:", friendsList);
+        }
+        console.log("friendsList:", JSON.stringify(friendsList));
+    });
+}
+
+function isFacebookContactDetailsURL(url) {
+    const regex = /^https:\/\/www\.facebook\.com\/[^\/]+\/about_contact_and_basic_info$/;
+    return regex.test(url);
+}
+
+function extractPhoneNumbers(text) {
+    const phoneRegex = /(\+?\d{1,3}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?\d{3}[-.\s]?\d{4}/g;
+    const phoneNumbers = text.match(phoneRegex);
+    return phoneNumbers ? phoneNumbers : [];
+}
+
+function extractEmails(text) {
+    const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+    const emails = text.match(emailRegex);
+    return emails ? emails : [];
+}
+
+
+
+
+
+
+
+//// Reset friends list:
+//chrome.storage.local.set({ friends: {} }, function() {});
+
+
+
+
+
+
+var friendsList;
+initializeFriends(function(friends) {
+  friendsList = friends;
+  var currentURL = window.location.href;
+  if (isFacebookContactDetailsURL(currentURL)) {
+    var divs = document.querySelectorAll("div");
+    for (var div of divs) {
+      var t = div.innerText;
+      if (t.substr(0,12)=="Contact info") {
+        var emails = extractEmails(t);
+        //console.log(emails);
+        var phones = extractPhoneNumbers(t);
+        //console.log(phones);
+        var name = document.querySelector("h1").innerText;
+        addFriend({"name":name, "phones":phones, "emails":emails});
+        break;
+      }
+    }
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
