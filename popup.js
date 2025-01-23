@@ -27,8 +27,8 @@ function logToContentConsole(message) {
     chrome.tabs.query(query, callback);
 }
 
-function clickButtonTestBG() {
-    chrome.runtime.sendMessage({"action":"TestBG"})
+function processFriends() {
+    chrome.runtime.sendMessage({"action":"startProcessing"})
     
       .then((response) => {
             logToContentConsole(response)
@@ -43,7 +43,7 @@ function clickButtonTestBG() {
 
 document.querySelector("#btnScroll").addEventListener("click", clickButtonScoll);
 document.querySelector("#btnLook").addEventListener("click", clickButtonLook);
-document.querySelector("#btnTestBG").addEventListener("click", clickButtonTestBG);
+document.querySelector("#btnProcessFriends").addEventListener("click", processFriends);
 
 
 

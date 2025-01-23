@@ -182,6 +182,7 @@ function visitNext() {
   if (friendIndex < fs.length) {
     var url = friends[fs[friendIndex]].url+"/about_contact_and_basic_info";
     console.log("url:", url);
+    window.open(url);
     //console.log("friendIndex:", friendIndex);
     //console.log("fs:", fs);
     //console.log("friends:", friends);

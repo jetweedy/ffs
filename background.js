@@ -5,7 +5,7 @@
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
-  if (request.action == "TestBG") {
+  if (request.action == "startProcessing") {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs){
 
       /*
