@@ -31,14 +31,15 @@ function splitFirstWord(str) {
     }
 }
 
-function displayMy(friends) {
-
-  console.log("test");
+function displayFriends() {
 
   var table = document.createElement("table");
   var tbody = document.createElement("tbody");
   table.append(tbody);
   for (var i in friends) {
+
+    console.log(friends[i].element);
+
     var tr = document.createElement("tr");
     tbody.append(tr);
     var td = document.createElement("td");
@@ -76,8 +77,9 @@ function displayMy(friends) {
 }
 
 
+var friends = {};
+var fs = [];
 function lookForFriends() {
-  var friends = {}
   var items = document.querySelectorAll("div");
   var regex = /\d+ mutual friends/;
   for (var i=0;i<items.length;i++) {
@@ -86,11 +88,22 @@ function lookForFriends() {
     if (t.length<200 && regex.test(t) && f!="" ) {
       if (!regex.test(f)) {
         var n = splitFirstWord(f);
-        friends[f] = {"first":n[0], "last":n[1]};
+        friends[f] = {
+          "first":n[0], "last":n[1],
+          "url":items[i].querySelector("a").href,
+        };
       }
     }
   }
-  displayMy(friends);
+  fs = [];
+  for (var f in friends) {
+    fs.push (f);
+  }
+
+  displayFriends();
+  //console.log(friends);
+  console.log(fs);
+
 }
 
 
@@ -164,8 +177,19 @@ document.addEventListener('keydown', function(event) {
 
 
 
-
-
+var friendIndex = 0;
+function visitNext() {
+  if (friendIndex < fs.length) {
+    var url = friends[fs[friendIndex]].url+"/about_contact_and_basic_info";
+    console.log("url:", url);
+    //console.log("friendIndex:", friendIndex);
+    //console.log("fs:", fs);
+    //console.log("friends:", friends);
+    //var friend = friends[friendIndex];
+    //console.log(friend);
+    friendIndex++;
+  }
+}
 
 
 
@@ -179,9 +203,13 @@ document.addEventListener('keydown', function(event) {
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
-    if (request.action === 'console.log') {
-        console.log(request.message);
+    if (request.action === 'visitNext') {
+      visitNext();
     }
+
+    //if (request.action === 'console.log') {
+    //    console.log(request.message);
+    //}
 
     if (request.action=="Look") {
         lookForFriends();
