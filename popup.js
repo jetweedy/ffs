@@ -44,6 +44,17 @@ function logToContentConsole(message) {
 }
 
 function processFriends() {
+
+    //// Send a message to the content page:
+    var query = { active: true, currentWindow: true };
+    function callback(tabs) {
+      chrome.tabs.sendMessage( tabs[0].id, {"action":"visitNext"} );
+    }
+    chrome.tabs.query(query, callback);
+
+
+    /*
+    //// Send a message to the background:
     chrome.runtime.sendMessage({"action":"visitNext"})
     
       .then((response) => {
@@ -52,7 +63,7 @@ function processFriends() {
       .catch((error) => {
             logToContentConsole(error)
       })
-    
+    */    
 }
 
 

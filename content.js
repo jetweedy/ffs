@@ -48,16 +48,16 @@ function displayFriends() {
   var table = document.createElement("table");
   var tbody = document.createElement("tbody");
   table.append(tbody);
-  for (var i in friends) {
+  for (var i in friendList) {
 
     var tr = document.createElement("tr");
     tbody.append(tr);
     var td = document.createElement("td");
-    td.innerHTML = friends[i].first;
+    td.innerHTML = friendList[i].first;
     td.style = "border:1px solid black;";
     tr.append(td);
     var td = document.createElement("td");
-    td.innerHTML = friends[i].last;
+    td.innerHTML = friendList[i].last;
     td.style = "border:1px solid black;";
     tr.append(td);
   }
@@ -87,8 +87,6 @@ function displayFriends() {
 }
 
 
-var friends = {};
-var fs = [];
 function lookForFriends() {
   var items = document.querySelectorAll("div");
   var regex = /\d+ mutual friends/;
@@ -98,20 +96,23 @@ function lookForFriends() {
     if (t.length<200 && regex.test(t) && f!="" ) {
       if (!regex.test(f)) {
         var n = splitFirstWord(f);
-        friends[f] = {
+        friendList[f] = {
           "first":n[0], "last":n[1],
           "url":items[i].querySelector("a").href,
         };
       }
     }
   }
-  fs = [];
-  for (var f in friends) {
-    fs.push (f);
+  friendNames = [];
+  for (var f in friendList) {
+    friendNames.push(f);
   }
+  chrome.storage.local.set({ "friendNames": friendNames }, function() {
+      if (callback) callback({});
+  });  
+  
   displayFriends();
-  //console.log(friends);
-  console.log(fs);
+
 }
 
 
@@ -149,15 +150,6 @@ function matchesFriendsPattern(text) {
     return pattern.test(text);
 }
 
-function getNumberOfFriends() {
-  var as = document.querySelectorAll("a");
-  for (var a of as) {
-    if (matchesFriendsPattern(a.innerHTML)) {
-      var numFriends = parseInt(a.innerHTML.replace(" friends").trim());
-      return numFriends;
-    }
-  }
-}
 
 function countLoadedFriends() {
   var loadedFriends = {};
@@ -201,9 +193,6 @@ function stopAutoScroll() {
   //lookForFriends();
 }
 
-var numFriends;
-numFriends = getNumberOfFriends();
-console.log("numFriends:", numFriends);
 
 // Listen for the Escape key press
 document.addEventListener('keydown', function(event) {
@@ -235,62 +224,109 @@ function goToFriends() {
 //// -------------------------------------------------------------
 
 
-var friendIndex = 0;
-function visitNext() {
-  if (friendIndex < fs.length) {
-    var url = friends[fs[friendIndex]].url+"/about_contact_and_basic_info?ffsProcessFriend";
-    //console.log("url:", url);
-    window.open(url);
-    //console.log("friendIndex:", friendIndex);
-    //console.log("fs:", fs);
-    //console.log("friends:", friends);
-    //var friend = friends[friendIndex];
-    //console.log(friend);
-    friendIndex++;
-  }
+//// Reset Data:
+//chrome.storage.local.set({ friendList: {} , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
+
+
+function initializeFriendIndex(callback) {
+    chrome.storage.local.get(['friendIndex'], function(result) {
+        if (chrome.runtime.lastError) {
+          return;
+        }
+        console.log("result.friendIndex:", result.friendIndex);
+        if (!result.friendIndex && !result.friendIndex===0) {
+          chrome.storage.local.set({ friendIndex: "0" }, function() {
+              if (callback) callback({});
+          });
+        } else {
+          if (callback) callback(result.friendIndex);
+        }
+    });
+}
+
+function initializeFriendData(callback) {
+    chrome.storage.local.get(['friendData'], function(result) {
+        if (chrome.runtime.lastError) {
+            return;
+        }
+
+        if (!result.friendData) {
+            chrome.storage.local.set({ friendData: {} }, function() {
+                if (callback) callback({});
+            });
+        } else {
+            if (callback) callback(result.friendData);
+        }
+    });
 }
 
 
-function initializeFriends(callback) {
-    chrome.storage.local.get(['friends'], function(result) {
+function initializeFriendNames(callback) {
+    chrome.storage.local.get(['friendNames'], function(result) {
+        if (chrome.runtime.lastError) {
+            return;
+        }
+
+        if (!result.friendNames) {
+            chrome.storage.local.set({ friendNames: [] }, function() {
+                if (callback) callback({});
+            });
+        } else {
+            if (callback) callback(result.friendNames);
+        }
+    });
+}
+
+
+function initializeFriendList(callback) {
+    chrome.storage.local.get(['friendList'], function(result) {
         if (chrome.runtime.lastError) {
             //console.error("Error accessing storage:", chrome.runtime.lastError);
             return;
         }
 
-        if (!result.friends) {
-            // If 'friends' does not exist, initialize it
-            chrome.storage.local.set({ friends: {} }, function() {
-                //console.log("Initialized 'friends' as an empty object.");
+        if (!result.friendList) {
+            // If 'friendList' does not exist, initialize it
+            chrome.storage.local.set({ friendList: {} }, function() {
+                //console.log("Initialized 'friendList' as an empty object.");
                 if (callback) callback({});
             });
         } else {
-            //console.log("Friends data exists:", result.friends);
-            if (callback) callback(result.friends);
+            //console.log("Friends data exists:", result.friendList);
+            if (callback) callback(result.friendList);
         }
     });
 }
 
 function addFriend(friend) {
 
-    console.log(friend);
-    return;
+    //console.log(friend);
+    //return;
 
-    if (!friendsList) {
+    if (!friendData) {
         //console.error("Friends list is not initialized yet.");
         return;
     }
-    friendsList[friend.name] = friend;
+    friendData[friend.name] = friend;
     //console.log("Added friend:", friend);
     // Step 4: Save updated friends list to chrome storage
-    chrome.storage.local.set({ friends: friendsList }, function() {
+    chrome.storage.local.set({ friendList: friendData }, function() {
         if (chrome.runtime.lastError) {
             //console.error("Error saving to storage:", chrome.runtime.lastError);
         } else {
-            //console.log("Updated friends list saved:", friendsList);
+            //console.log("Updated friends list saved:", friendData);
         }
-        console.log("friendsList:", JSON.stringify(friendsList));
+        console.log("friendData:", JSON.stringify(friendData));
     });
+}
+
+function visitNext() {
+  if (friendIndex < friendNames.length) {
+    var url = friendList[friendNames[friendIndex]].url+"/about_contact_and_basic_info?ffsProcessFriend";
+    //console.log("url:", url);
+    window.open(url);
+    friendIndex++;
+  }
 }
 
 function isFacebookContactDetailsURL(url) {
@@ -310,18 +346,41 @@ function extractEmails(text) {
     return emails ? emails : [];
 }
 
-//// Reset friends list:
-//chrome.storage.local.set({ friends: {} }, function() {});
 
-//// Load saved friends data and add current friend page info (if on the right kind of page):
-var friendsList;
-initializeFriends(function(friends) {
-  friendsList = friends;
+
+
+
+
+
+
+var friendIndex = 0;
+initializeFriendIndex(function(fi) {
+  friendIndex = fi;
+  console.log("friendIndex:", friendIndex);
+})
+
+var friendNames = [];
+initializeFriendNames(function(fn) {
+  friendNames = fn;
+  console.log("friendNames:", friendNames);
+})
+
+var friendList = {};
+initializeFriendList(function(fl) {
+  friendList = fl;
+  console.log("friendList:", friendList);
+})
+
+
+var friendData = {};
+initializeFriendData(function(fd) {
+  friendData = fd;
+  console.log("friendData:", friendData);
   //var currentURL = window.location.href;
   //if (isFacebookContactDetailsURL(currentURL)) {
   var urlParams = new URLSearchParams(window.location.search);
+
   var ffsProcessFriend = urlParams.get('ffsProcessFriend');
-  //console.log("ffs not null?:", ffs!==null);
   if (ffsProcessFriend!==null) {
     var divs = document.querySelectorAll("div");
     for (var div of divs) {
@@ -337,6 +396,9 @@ initializeFriends(function(friends) {
       }
     }
   }
+
+
+
 });
 
 
