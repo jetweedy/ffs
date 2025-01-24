@@ -107,7 +107,7 @@ function lookForFriends() {
   for (var f in friendList) {
     friendNames.push(f);
   }
-  chrome.storage.local.set({ "friendNames": friendNames }, function() {
+  chrome.storage.local.set({ "friendNames": friendNames, "friendList":friendList }, function() {
       if (callback) callback({});
   });  
   
@@ -225,7 +225,12 @@ function goToFriends() {
 
 
 //// Reset Data:
-//chrome.storage.local.set({ friendList: {} , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
+function resetData() {
+  chrome.storage.local.set({ friendList: {} , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
+  console.log("Resetting Data");
+  window.location.reload();
+
+}
 
 
 function initializeFriendIndex(callback) {
@@ -310,22 +315,24 @@ function addFriend(friend) {
     friendData[friend.name] = friend;
     //console.log("Added friend:", friend);
     // Step 4: Save updated friends list to chrome storage
-    chrome.storage.local.set({ friendList: friendData }, function() {
+
+
+    friendIndex++;
+    chrome.storage.local.set({ friendData: friendData, friendIndex: friendIndex }, function() {
         if (chrome.runtime.lastError) {
-            //console.error("Error saving to storage:", chrome.runtime.lastError);
         } else {
-            //console.log("Updated friends list saved:", friendData);
+          //visitNext();
         }
-        console.log("friendData:", JSON.stringify(friendData));
     });
+
 }
 
 function visitNext() {
   if (friendIndex < friendNames.length) {
     var url = friendList[friendNames[friendIndex]].url+"/about_contact_and_basic_info?ffsProcessFriend";
     //console.log("url:", url);
-    window.open(url);
-    friendIndex++;
+    //window.open(url);
+    window.location.replace(url);
   }
 }
 
@@ -413,6 +420,10 @@ initializeFriendData(function(fd) {
 //// -------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+    if (request.action == "ResetData") {
+      resetData();
+    }
 
     if (request.action == 'visitNext') {
       visitNext();

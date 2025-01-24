@@ -2,6 +2,13 @@
 
 //alert("Hello, world from popup!")
 
+function clickResetData() {
+    var query = { active: true, currentWindow: true };
+    function callback(tabs) {
+      chrome.tabs.sendMessage( tabs[0].id, {"action":"ResetData"} );
+    }
+    chrome.tabs.query(query, callback);
+}
 
 function clickButtonCountLoadedFriends() {   
     var query = { active: true, currentWindow: true };
@@ -66,7 +73,7 @@ function processFriends() {
     */    
 }
 
-
+document.querySelector("#btnResetData").addEventListener("click", clickResetData);
 document.querySelector("#btnGoToFriends").addEventListener("click", clickButtonGoToFriends);
 document.querySelector("#btnCountLoadedFriends").addEventListener("click", clickButtonCountLoadedFriends);
 document.querySelector("#btnScroll").addEventListener("click", clickButtonScroll);
