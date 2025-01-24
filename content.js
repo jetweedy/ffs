@@ -356,20 +356,58 @@ function addFriend(friend) {
     chrome.storage.local.set({ friendData: friendData, friendIndex: friendIndex }, function() {
         if (chrome.runtime.lastError) {
         } else {
-          //visitNext();
+          setTimeout(visitNext, 3000);
+          //if (confirm("Continue?")) {
+          //  visitNext();
+          //}
         }
     });
 
 }
 
-function visitNext() {
-  if (friendIndex < friendNames.length) {
-    var url = friendList[friendNames[friendIndex]].url+"/about_contact_and_basic_info?ffsProcessFriend";
-    //console.log("url:", url);
+
+
+//// Here I'd like to just loop through the indexes in friendList and process the ones that haven't been found in friendData yet... but it's not working yet.
+function _visitNext() {
+  var url = false;
+  for (var n in friendNames) {
+    if (typeof friendData[n] == "undefined") {
+      var url = friendList[n].url;
+      if (url.indexOf("?id") > 0) {
+        url += "&sk=about_contact_and_basic_info&ffsProcessFriend"
+      } else {
+        url += "/about_contact_and_basic_info?ffsProcessFriend";
+      }
+      break;
+    }
+  }
+  if (!!url) {
     //window.open(url);
     window.location.replace(url);
   }
 }
+
+
+
+function visitNext() {
+  if (friendIndex < friendNames.length) {
+    var url = friendList[friendNames[friendIndex]].url;
+    if (url.indexOf("?id") > 0) {
+      url += "&sk=about_contact_and_basic_info&ffsProcessFriend"
+    } else {
+      url += "/about_contact_and_basic_info?ffsProcessFriend";
+    }
+    //window.open(url);
+    window.location.replace(url);
+  }
+}
+
+
+
+
+
+
+
 
 function isFacebookContactDetailsURL(url) {
     const regex = /^https:\/\/www\.facebook\.com\/[^\/]+\/about_contact_and_basic_info$/;
@@ -424,6 +462,12 @@ initializeFriendData(function(fd) {
 
   var ffsProcessFriend = urlParams.get('ffsProcessFriend');
   if (ffsProcessFriend!==null) {
+
+    //// Set a timeout to reload this page just in case something breaks later.
+    setTimeout(function() {
+      window.location.reload();
+    }, 10000);
+
     var divs = document.querySelectorAll("div");
     for (var div of divs) {
       var t = div.innerText;
@@ -487,6 +531,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     //// https://stackoverflow.com/questions/14245334/sendmessage-from-extension-background-or-popup-to-content-script-doesnt-work
     //// This keeps some port from closing prematurely:
     return true
+
 })
 
 
