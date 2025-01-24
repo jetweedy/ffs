@@ -31,6 +31,30 @@ document.body.append(coverDiv);
 //// EXAMINE FRIENDS LIST AND PREPARE FOR PROCESSING INDIVUALS:
 //// -------------------------------------------------------------
 
+function highlightAndCopyElementContents(element) {
+    if (!element) {
+        console.error("Invalid element provided.");
+        return;
+    }
+    // Create a range to select the element's contents
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    // Select the contents
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    // Copy to clipboard
+    try {
+        document.execCommand("copy");
+        alert("Content copied to clipboard!");
+    } catch (err) {
+        console.error("Failed to copy: ", err);
+    }
+    // Optional: Clear selection after copying
+    setTimeout(() => selection.removeAllRanges(), 1000);
+}
+
+
 function splitFirstWord(str) {
     // Use a regular expression to match the first word and the rest of the string
     let match = str.match(/^(\S+)\s*(.*)$/);
@@ -43,13 +67,19 @@ function splitFirstWord(str) {
     }
 }
 
+
+var resultsContainer = document.createElement("div");
+resultsContainer.style = "display:none; background-color:white; position:fixed; width:500px; left:15%; top:15%; border:2px solid black; border-collapse:collapse; height:350px;";
+document.body.append(resultsContainer);
+
+
 function displayFriends() {
 
+  resultsContainer.innerHTML = "";
   var table = document.createElement("table");
   var tbody = document.createElement("tbody");
   table.append(tbody);
   for (var i in friendList) {
-
     var tr = document.createElement("tr");
     tbody.append(tr);
     var td = document.createElement("td");
@@ -62,27 +92,32 @@ function displayFriends() {
     tr.append(td);
   }
 
-  var resultsContainer = document.createElement("div");
-  resultsContainer.style = "background-color:white; position:fixed; width:500px; left:15%; top:15%; border:2px solid black; border-collapse:collapse; height:350px;";
-  document.body.append(resultsContainer);
-
-  var a = document.createElement("button");
-  a.innerHTML = "[X]";
-  a.style.float = "right";
-  a.addEventListener("click", function() {
-    this.element.parentNode.removeChild(this.element);
-  }.bind({"element":resultsContainer}));
   var p = document.createElement("p");
   p.style = "text-align:right;";
-  p.append(a);
   resultsContainer.append(p);
+
+  var a = document.createElement("button");
+  a.style.margin = "5px 10px";
+  a.innerHTML = "[Highlight All]";
+  a.addEventListener("click", function() {
+    highlightAndCopyElementContents(this.table);
+  }.bind({"table":table}));
+  p.append(a);
+
+  var a = document.createElement("button");
+  a.style.margin = "5px 10px";
+  a.innerHTML = "[X]";
+  a.addEventListener("click", function() {
+    resultsContainer.style.display = "none";
+  });
+  p.append(a);
 
   var tableContainer = document.createElement("div");
   tableContainer.style = "margin:5%; left:15%; top:15%; border-collapse:collapse; height:300px; overflow-y:scroll;";
-  document.body.append(tableContainer);
   tableContainer.append(table);
-
   resultsContainer.append(tableContainer);
+  resultsContainer.style.display = "block";
+  highlightElementContents(table);
 
 }
 
