@@ -238,7 +238,7 @@ function goToFriends() {
 var friendIndex = 0;
 function visitNext() {
   if (friendIndex < fs.length) {
-    var url = friends[fs[friendIndex]].url+"/about_contact_and_basic_info";
+    var url = friends[fs[friendIndex]].url+"/about_contact_and_basic_info?ffsProcessFriend";
     //console.log("url:", url);
     window.open(url);
     //console.log("friendIndex:", friendIndex);
@@ -317,8 +317,12 @@ function extractEmails(text) {
 var friendsList;
 initializeFriends(function(friends) {
   friendsList = friends;
-  var currentURL = window.location.href;
-  if (isFacebookContactDetailsURL(currentURL)) {
+  //var currentURL = window.location.href;
+  //if (isFacebookContactDetailsURL(currentURL)) {
+  var urlParams = new URLSearchParams(window.location.search);
+  var ffsProcessFriend = urlParams.get('ffsProcessFriend');
+  //console.log("ffs not null?:", ffs!==null);
+  if (ffsProcessFriend!==null) {
     var divs = document.querySelectorAll("div");
     for (var div of divs) {
       var t = div.innerText;
