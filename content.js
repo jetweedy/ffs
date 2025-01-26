@@ -347,7 +347,7 @@ function addFriend(friend) {
         //console.error("Friends list is not initialized yet.");
         return;
     }
-    friendData[friend.name] = friend;
+    friendData[friend.name.trim()] = friend;
     //console.log("Added friend:", friend);
     // Step 4: Save updated friends list to chrome storage
 
@@ -368,9 +368,11 @@ function addFriend(friend) {
 
 
 //// Here I'd like to just loop through the indexes in friendList and process the ones that haven't been found in friendData yet... but it's not working yet.
-function _visitNext() {
+function visitNext() {
   var url = false;
-  for (var n in friendNames) {
+  for (var n in friendList) {
+    console.log("n:", n);
+    console.log("friendData["+n+"]", friendData[n]);
     if (typeof friendData[n] == "undefined") {
       var url = friendList[n].url;
       if (url.indexOf("?id") > 0) {
@@ -383,13 +385,13 @@ function _visitNext() {
   }
   if (!!url) {
     //window.open(url);
-    window.location.replace(url);
+    //window.location.replace(url);
   }
 }
 
 
 
-function visitNext() {
+function _visitNext() {
   if (friendIndex < friendNames.length) {
     var url = friendList[friendNames[friendIndex]].url;
     if (url.indexOf("?id") > 0) {
@@ -464,9 +466,9 @@ initializeFriendData(function(fd) {
   if (ffsProcessFriend!==null) {
 
     //// Set a timeout to reload this page just in case something breaks later.
-    setTimeout(function() {
-      window.location.reload();
-    }, 10000);
+    //setTimeout(function() {
+    //  window.location.reload();
+    //}, 10000);
 
     var divs = document.querySelectorAll("div");
     for (var div of divs) {
@@ -480,6 +482,9 @@ initializeFriendData(function(fd) {
         addFriend({"name":name, "phones":phones, "emails":emails, "contactText":t});
         break;
       }
+    }
+    if (typeof friendData[name] == "undefined") {
+      addFriend({"name":name, "phones":[], "emails":[], "contactText":""});
     }
   }
 
