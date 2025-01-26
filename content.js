@@ -261,7 +261,7 @@ function goToFriends() {
 
 //// Reset Data:
 function resetData() {
-  chrome.storage.local.set({ friendList: {} , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
+  chrome.storage.local.set({ friendList: friendList , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
   //console.log("Resetting Data");
   window.location.reload();
 
