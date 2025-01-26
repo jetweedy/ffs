@@ -10,6 +10,15 @@ function clickResetData() {
     chrome.tabs.query(query, callback);
 }
 
+function showFriendData() {
+    var query = { active: true, currentWindow: true };
+    function callback(tabs) {
+      chrome.tabs.sendMessage( tabs[0].id, {"action":"ShowFriendData"} );
+    }
+    chrome.tabs.query(query, callback);
+}
+
+
 function clickButtonCountLoadedFriends() {   
     var query = { active: true, currentWindow: true };
     function callback(tabs) {
@@ -73,6 +82,7 @@ function processFriends() {
     */    
 }
 
+document.querySelector("#btnShowFriendData").addEventListener("click", showFriendData);
 document.querySelector("#btnResetData").addEventListener("click", clickResetData);
 document.querySelector("#btnGoToFriends").addEventListener("click", clickButtonGoToFriends);
 document.querySelector("#btnCountLoadedFriends").addEventListener("click", clickButtonCountLoadedFriends);

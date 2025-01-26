@@ -208,7 +208,7 @@ function startAutoScroll() {
   showCoverDiv("Scrolling...");
   scrollInterval = setInterval(() => {
     var loadedFriends = countLoadedFriends();
-    console.log(loadedFriends, "|", lastCount);
+    //console.log(loadedFriends, "|", lastCount);
     if (loadedFriends == lastCount) {
       stopAutoScroll();
     }
@@ -224,7 +224,7 @@ function startAutoScroll() {
 function stopAutoScroll() {
   clearInterval(scrollInterval); // Stop the scrolling
   hideCoverDiv();
-  console.log('Scrolling stopped.');
+  //console.log('Scrolling stopped.');
   //lookForFriends();
 }
 
@@ -262,7 +262,7 @@ function goToFriends() {
 //// Reset Data:
 function resetData() {
   chrome.storage.local.set({ friendList: {} , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
-  console.log("Resetting Data");
+  //console.log("Resetting Data");
   window.location.reload();
 
 }
@@ -273,7 +273,7 @@ function initializeFriendIndex(callback) {
         if (chrome.runtime.lastError) {
           return;
         }
-        console.log("result.friendIndex:", result.friendIndex);
+        //console.log("result.friendIndex:", result.friendIndex);
         if (!result.friendIndex && !result.friendIndex===0) {
           chrome.storage.local.set({ friendIndex: "0" }, function() {
               if (callback) callback({});
@@ -347,7 +347,8 @@ function addFriend(friend) {
         //console.error("Friends list is not initialized yet.");
         return;
     }
-    friendData[friend.name.trim()] = friend;
+    friend.name = friend.name.replace(/\(.*?\)/, "").trim();
+    friendData[friend.name] = friend;
     //console.log("Added friend:", friend);
     // Step 4: Save updated friends list to chrome storage
 
@@ -371,8 +372,8 @@ function addFriend(friend) {
 function visitNext() {
   var url = false;
   for (var n in friendList) {
-    console.log("n:", n);
-    console.log("friendData["+n+"]", friendData[n]);
+    //console.log("n:", n);
+    //console.log("friendData["+n+"]", friendData[n]);
     if (typeof friendData[n] == "undefined") {
       var url = friendList[n].url;
       if (url.indexOf("?id") > 0) {
@@ -385,7 +386,7 @@ function visitNext() {
   }
   if (!!url) {
     //window.open(url);
-    //window.location.replace(url);
+    window.location.replace(url);
   }
 }
 
@@ -438,26 +439,26 @@ function extractEmails(text) {
 var friendIndex = 0;
 initializeFriendIndex(function(fi) {
   friendIndex = fi;
-  console.log("friendIndex:", friendIndex);
+  //console.log("friendIndex:", friendIndex);
 })
 
 var friendNames = [];
 initializeFriendNames(function(fn) {
   friendNames = fn;
-  console.log("friendNames:", friendNames);
+  //console.log("friendNames:", friendNames);
 })
 
 var friendList = {};
 initializeFriendList(function(fl) {
   friendList = fl;
-  console.log("friendList:", friendList);
+  //console.log("friendList:", friendList);
 })
 
 
 var friendData = {};
 initializeFriendData(function(fd) {
   friendData = fd;
-  console.log("friendData:", friendData);
+  //console.log("friendData:", friendData);
   //var currentURL = window.location.href;
   //if (isFacebookContactDetailsURL(currentURL)) {
   var urlParams = new URLSearchParams(window.location.search);
@@ -466,9 +467,9 @@ initializeFriendData(function(fd) {
   if (ffsProcessFriend!==null) {
 
     //// Set a timeout to reload this page just in case something breaks later.
-    //setTimeout(function() {
-    //  window.location.reload();
-    //}, 10000);
+    setTimeout(function() {
+      window.location.reload();
+    }, 10000);
 
     var divs = document.querySelectorAll("div");
     for (var div of divs) {
@@ -483,9 +484,9 @@ initializeFriendData(function(fd) {
         break;
       }
     }
-    if (typeof friendData[name] == "undefined") {
-      addFriend({"name":name, "phones":[], "emails":[], "contactText":""});
-    }
+    //if (typeof friendData[name] == "undefined") {
+    //  addFriend({"name":name, "phones":[], "emails":[], "contactText":""});
+    //}
   }
 
 
@@ -494,7 +495,10 @@ initializeFriendData(function(fd) {
 
 
 
-
+function showFriendData() {
+  console.log("friendList:", friendList);
+  console.log("friendData:", friendData);
+}
 
 
 
@@ -504,6 +508,10 @@ initializeFriendData(function(fd) {
 //// -------------------------------------------------------------
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+
+    if (request.action == "ShowFriendData") {
+      showFriendData();
+    }
 
     if (request.action == "ResetData") {
       resetData();
@@ -515,7 +523,7 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 
     if (request.action == "CountLoadedFriends") {
       var lf = countLoadedFriends();
-      console.log("Loaded Friends:", lf);
+      //console.log("Loaded Friends:", lf);
     }
 
     if (request.action == "GoToFriends") {
