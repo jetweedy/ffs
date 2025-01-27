@@ -1,0 +1,10 @@
+
+___ Create a new button for exporting FriendData (to JSON, to CSV, etc)
+
+___ Create a new button for crawling mutual friends of each friend (similar to visitNext, but process mutual friends instead)
+		Scroll until fully loaded
+		Grab the list and save under that friend's name
+
+___ Create a new button for crawling locations
+
+
