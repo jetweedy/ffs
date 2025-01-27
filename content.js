@@ -208,7 +208,7 @@ function startAutoScroll() {
   showCoverDiv("Scrolling...");
   scrollInterval = setInterval(() => {
     var loadedFriends = countLoadedFriends();
-    //console.log(loadedFriends, "|", lastCount);
+    console.log(loadedFriends, "|", lastCount);
     if (loadedFriends == lastCount) {
       stopAutoScroll();
     }
@@ -261,7 +261,8 @@ function goToFriends() {
 
 //// Reset Data:
 function resetData() {
-  chrome.storage.local.set({ friendList: friendList , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
+  chrome.storage.local.set({ friendList: {} , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
+  //chrome.storage.local.set({ friendList: friendList , friendData: {}, friendNames: [], friendIndex: 0}, function() {});
   //console.log("Resetting Data");
   window.location.reload();
 
@@ -377,9 +378,9 @@ function visitNext() {
     if (typeof friendData[n] == "undefined") {
       var url = friendList[n].url;
       if (url.indexOf("?id") > 0) {
-        url += "&sk=about_contact_and_basic_info&ffsProcessFriend"
+        url += "&sk=about_contact_and_basic_info&ffsProcessFriend="+encodeURIComponent(n);
       } else {
-        url += "/about_contact_and_basic_info?ffsProcessFriend";
+        url += "/about_contact_and_basic_info?ffsProcessFriend="+encodeURIComponent(n);
       }
       break;
     }
@@ -466,12 +467,15 @@ initializeFriendData(function(fd) {
   var ffsProcessFriend = urlParams.get('ffsProcessFriend');
   if (ffsProcessFriend!==null) {
 
+    ffsProcessFriend = decodeURIComponent(ffsProcessFriend);
+
     //// Set a timeout to reload this page just in case something breaks later.
     setTimeout(function() {
       window.location.reload();
     }, 10000);
 
     var divs = document.querySelectorAll("div");
+    var addingFriend = false;
     for (var div of divs) {
       var t = div.innerText;
       if (t.substr(0,12)=="Contact info") {
@@ -481,12 +485,12 @@ initializeFriendData(function(fd) {
         //console.log(phones);
         var name = document.querySelector("h1").innerText;
         addFriend({"name":name, "phones":phones, "emails":emails, "contactText":t});
+        addingFriend = True;
         break;
+      } else {
+        addFriend({"name":ffsProcessFriend, "phones":[], "emails":[], "contactText":""});
       }
     }
-    //if (typeof friendData[name] == "undefined") {
-    //  addFriend({"name":name, "phones":[], "emails":[], "contactText":""});
-    //}
   }
 
 
